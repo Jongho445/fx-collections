@@ -1,6 +1,7 @@
 import Optionalable from "@libs/optional/Optionalable";
+import Optional from "@libs/optional/Optional";
 
-export default class Person extends Optionalable {
+export default class Person extends Optionalable<Person> {
 
   constructor(
     public readonly name: string,
@@ -8,5 +9,7 @@ export default class Person extends Optionalable {
   ) {
     super();
   }
+
+  run = () => Optional.of(this);
 
 }

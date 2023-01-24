@@ -1,8 +1,10 @@
 export default class Optional<T> {
 
-  private constructor(
-    private readonly elem: T
-  ) {}
+  private readonly elem: T;
+
+  private constructor(elem: T) {
+    this.elem = elem;
+  }
 
   public static of<T>(elem: T) {
     return new Optional(elem);

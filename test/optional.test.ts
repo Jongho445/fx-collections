@@ -9,7 +9,6 @@ describe("describe", () => {
       .also(() => console.log("이 콘솔이 실행되었다면 미성년자가 아닙니다."));
 
     const personName = new Person("peter", 29)
-      .run()
       .filter(it => it.age > 20)
       .map(it => it.name)
       .orElse(Error("미성년자 입니다."));
