@@ -1,9 +1,10 @@
 import run from "@libs/optional/run";
+import Optional from "@libs/optional/Optional";
 import Person from "./mock/Person";
 
 describe("describe", () => {
   it("it", () => {
-    const person = run(new Person("john", 22))
+    const person = Optional.of(new Person("john", 22))
       .filter(({ age }) => age > 20)
       .also(() => console.log("이 콘솔이 실행되었다면 미성년자가 아닙니다."));
 

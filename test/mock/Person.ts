@@ -1,13 +1,12 @@
-import Optional from "@libs/optional/Optional";
+import Optionalable from "@libs/optional/Optionalable";
 
-export default class Person {
+export default class Person extends Optionalable {
 
   constructor(
     public readonly name: string,
     public readonly age: number
-  ) {}
-
-  public run() {
-    return Optional.of(this)
+  ) {
+    super();
   }
+
 }
