@@ -18,7 +18,7 @@ export default class AsyncIterable<T, Collection extends Iterable<T>> {
   }
 
   public get(): Promise<Collection> {
-    if (this.elems instanceof Promise) {
+    if (this.elems instanceof Promise<Collection>) {
       return this.elems;
     }
     else {
@@ -27,7 +27,7 @@ export default class AsyncIterable<T, Collection extends Iterable<T>> {
   }
 
   public forEach(fn: ForEachFunction<T, Collection>) {
-    if (this.elems instanceof Promise) {
+    if (this.elems instanceof Promise<Collection>) {
       const promise = this.elems
         .then(innerElems => this.runInParallel(innerElems, fn))
         .then(() => this.elems);
@@ -43,7 +43,7 @@ export default class AsyncIterable<T, Collection extends Iterable<T>> {
   }
 
   public map<R>(fn: MapFunction<T, R, Collection>) {
-    if (this.elems instanceof Promise) {
+    if (this.elems instanceof Promise<Collection>) {
       const promise = this.elems
         .then(innerElems => this.runInParallel(innerElems, fn));
 
