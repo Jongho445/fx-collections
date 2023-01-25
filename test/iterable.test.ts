@@ -1,4 +1,4 @@
-import AsyncList from "@libs/async-iterable/AsyncList";
+import AsyncList from "@libs/async-iterable/collections/AsyncList";
 import AsyncIterable from "@libs/async-iterable/AsyncIterable";
 
 describe("describe", () => {
@@ -20,6 +20,5 @@ describe("describe", () => {
       .iter<[number, string], Map<number, string>>(map)
       .map(elem => Promise.resolve(elem))
       .get();
-
   });
 });

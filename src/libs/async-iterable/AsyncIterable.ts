@@ -1,9 +1,11 @@
-type MapFunction<T, R, Collection> = (value: T, index: number, prev: T | null, iterable: Collection) => Promise<R>;
-type ForEachFunction<T, Collection> = MapFunction<T, any, Collection>;
+import {MapFunction, ForEachFunction} from "@libs/async-iterable/types";
+import ForEachMapExecutor from "@libs/async-iterable/executor/ForEachMapExecutor";
 
 export default class AsyncIterable<T, Collection extends Iterable<T>> {
 
   private readonly elems: Collection | Promise<Collection>;
+
+  private readonly fe = new ForEachMapExecutor();
 
   public constructor(elems: Collection | Promise<Collection>) {
     this.elems = elems;
@@ -26,62 +28,12 @@ export default class AsyncIterable<T, Collection extends Iterable<T>> {
     }
   }
 
-  public forEach(fn: ForEachFunction<T, Collection>) {
-    if (this.elems instanceof Promise<Collection>) {
-      const promise = this.elems
-        .then(innerElems => this.runInParallel(innerElems, fn))
-        .then(() => this.elems);
-
-      return this.chain<T, Collection>(promise);
-    }
-    else {
-      const promise = this.runInParallel(this.elems, fn)
-        .then(() => this.elems);
-
-      return this.chain<T, Collection>(promise);
-    }
+  public forEach(fn: ForEachFunction<T, Collection>): AsyncIterable<T, Collection> {
+    return this.fe.forEach(this.elems, fn, promise => this.chain(promise));
   }
 
-  public map<R>(fn: MapFunction<T, R, Collection>) {
-    if (this.elems instanceof Promise<Collection>) {
-      const promise = this.elems
-        .then(innerElems => this.runInParallel(innerElems, fn));
-
-      return this.chain<R, R[]>(promise);
-    }
-    else {
-      const promise = this.runInParallel(this.elems, fn);
-      return this.chain<R, R[]>(promise);
-    }
+  public map<R>(fn: MapFunction<T, R, Collection>): AsyncIterable<R, R[]> {
+    return this.fe.map(this.elems, fn, promise => this.chain(promise));
   }
 
-  private async runInSync<R>(elems: Collection, fn: MapFunction<T, R, Collection>): Promise<R[]> {
-    const result: R[] = [];
-
-    let idx = 0;
-    let prev: T | null = null;
-    for (const value of elems) {
-      const elem = await fn(value, idx, prev, elems)
-      result.push(elem);
-      idx++;
-      prev = value;
-    }
-
-    return result;
-  }
-
-  private runInParallel<R>(elems: Collection, fn: MapFunction<T, R, Collection>): Promise<R[]> {
-    const promises: Promise<R>[] = [];
-
-    let idx = 0;
-    let prev: T | null = null;
-    for (const value of elems) {
-      const elem = fn(value, idx, prev, elems)
-      promises.push(elem);
-      idx++;
-      prev = value;
-    }
-
-    return Promise.all(promises);
-  }
 }

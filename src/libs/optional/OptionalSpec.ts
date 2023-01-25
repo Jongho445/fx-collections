@@ -1,6 +1,6 @@
 import Optional from "@libs/optional/Optional";
 
-export default abstract class Optionalable<T> {
+export default abstract class OptionalSpec<T> {
 
   abstract run(): Optional<T>;
 
