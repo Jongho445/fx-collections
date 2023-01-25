@@ -1,4 +1,5 @@
 import AsyncList from "@libs/async-iterable/AsyncList";
+import AsyncIterable from "@libs/async-iterable/AsyncIterable";
 
 describe("describe", () => {
   it("list", async () => {
@@ -11,11 +12,14 @@ describe("describe", () => {
     console.log(result);
   });
 
+
   it("map", async () => {
     const map = new Map<number, string>();
-    const result = await AsyncList
-      .of(map)
+    // const result = await new AsyncIterable<[number, string], Map<number, string>>(map)
+    const result = await AsyncIterable
+      .iter<[number, string], Map<number, string>>(map)
       .map(elem => Promise.resolve(elem))
-      .get()
-  })
-})
+      .get();
+
+  });
+});
