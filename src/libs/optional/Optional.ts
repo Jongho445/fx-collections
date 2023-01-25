@@ -10,45 +10,49 @@ export default class Optional<T> {
     return new Optional(elem);
   }
 
-  public also(fx: (elem: NonNullable<T>) => void): T {
+  public get(): T {
+    return this.elem;
+  }
+
+  public also(fn: (elem: NonNullable<T>) => void): T {
     if (this.elem !== undefined && this.elem !== null) {
-      fx(this.elem);
+      fn(this.elem);
     }
 
     return this.elem;
   }
 
-  public let<R>(fx: (elem: NonNullable<T>) => R): R | Extract<T, undefined | null> {
+  public let<R>(fn: (elem: NonNullable<T>) => R): R | Extract<T, undefined | null> {
     if (this.elem === undefined || this.elem === null) {
       return this.elem as Extract<T, undefined | null>;
     }
     // this.elem이 NonNullable<T>인 case
     else {
-      return fx(this.elem);
+      return fn(this.elem);
     }
   }
 
-  public filter(fx: (elem: NonNullable<T>) => boolean): Optional<T | null> {
+  public filter(fn: (elem: NonNullable<T>) => boolean): Optional<T | null> {
     if (this.elem === undefined || this.elem === null) {
       return Optional.of(null);
     }
 
-    if (fx(this.elem)) {
+    if (fn(this.elem)) {
       return this;
     } else {
       return Optional.of(null);
     }
   }
 
-  public peek(fx: (elem: NonNullable<T>) => void): Optional<T> {
+  public peek(fn: (elem: NonNullable<T>) => void): Optional<T> {
     if (this.elem !== undefined && this.elem !== null) {
-      fx(this.elem);
+      fn(this.elem);
     }
 
     return this;
   }
 
-  public map<R>(fx: (elem: NonNullable<T>) => R): Optional<R | undefined | null> {
+  public flatMap<R>(fn: (elem: NonNullable<T>) => Optional<R>): Optional<R | undefined | null> {
     if (this.elem === undefined) {
       return Optional.of(undefined);
     }
@@ -56,7 +60,19 @@ export default class Optional<T> {
       return Optional.of(null)
     }
     else {
-      return Optional.of(fx(this.elem));
+      return Optional.of(fn(this.elem).get());
+    }
+  }
+
+  public map<R>(fn: (elem: NonNullable<T>) => R): Optional<R | undefined | null> {
+    if (this.elem === undefined) {
+      return Optional.of(undefined);
+    }
+    else if(this.elem === null) {
+      return Optional.of(null)
+    }
+    else {
+      return Optional.of(fn(this.elem));
     }
   }
 

@@ -10,5 +10,9 @@ export default class Person extends SubAbstractPerson<Person> {
     super(name, age);
   }
 
+  public static of(name: string, age: number) {
+    return new Person(name, age);
+  }
+
   run = () => Optional.of(this as Person);
 }
