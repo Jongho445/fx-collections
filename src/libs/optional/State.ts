@@ -1,4 +1,4 @@
-export default class Optional<T> {
+export default class State<T> {
 
   private readonly elem: T;
 
@@ -7,11 +7,15 @@ export default class Optional<T> {
   }
 
   public static of<T>(elem: T) {
-    return new Optional(elem);
+    return new State(elem);
   }
 
-  public get(): T {
+  public get() {
     return this.elem;
+  }
+
+  private chain<T>(elem: T) {
+    return State.of(elem);
   }
 
   public also(fn: (elem: NonNullable<T>) => void): T {
@@ -25,26 +29,24 @@ export default class Optional<T> {
   public let<R>(fn: (elem: NonNullable<T>) => R): R | Extract<T, undefined | null> {
     if (this.elem === undefined || this.elem === null) {
       return this.elem as Extract<T, undefined | null>;
-    }
-    // this.elem이 NonNullable<T>인 case
-    else {
+    } else { // this.elem이 NonNullable<T>인 case
       return fn(this.elem);
     }
   }
 
-  public filter(fn: (elem: NonNullable<T>) => boolean): Optional<T | null> {
+  public filter(fn: (elem: NonNullable<T>) => boolean): State<T | null> {
     if (this.elem === undefined || this.elem === null) {
-      return Optional.of(null);
+      return this.chain(null)
     }
 
     if (fn(this.elem)) {
       return this;
     } else {
-      return Optional.of(null);
+      return this.chain(null);
     }
   }
 
-  public peek(fn: (elem: NonNullable<T>) => void): Optional<T> {
+  public peek(fn: (elem: NonNullable<T>) => void): State<T> {
     if (this.elem !== undefined && this.elem !== null) {
       fn(this.elem);
     }
@@ -52,27 +54,19 @@ export default class Optional<T> {
     return this;
   }
 
-  public flatMap<R>(fn: (elem: NonNullable<T>) => Optional<R>): Optional<R | undefined | null> {
-    if (this.elem === undefined) {
-      return Optional.of(undefined);
-    }
-    else if(this.elem === null) {
-      return Optional.of(null)
-    }
-    else {
-      return Optional.of(fn(this.elem).get());
+  public flatMap<R>(fn: (elem: NonNullable<T>) => State<R>): State<R | undefined | null> {
+    if (this.elem === undefined || this.elem === null) {
+      return this.chain(this.elem as undefined | null);
+    } else {
+      return this.chain(fn(this.elem).get());
     }
   }
 
-  public map<R>(fn: (elem: NonNullable<T>) => R): Optional<R | undefined | null> {
-    if (this.elem === undefined) {
-      return Optional.of(undefined);
-    }
-    else if(this.elem === null) {
-      return Optional.of(null)
-    }
-    else {
-      return Optional.of(fn(this.elem));
+  public map<R>(fn: (elem: NonNullable<T>) => R): State<R | undefined | null> {
+    if (this.elem === undefined || this.elem === null) {
+      return this.chain(this.elem as undefined | null)
+    } else {
+      return this.chain(fn(this.elem));
     }
   }
 
@@ -83,11 +77,9 @@ export default class Optional<T> {
   public orElse<R>(param: R): R | NonNullable<T> {
     if (param instanceof Error) {
       return this.orElseThrow(param);
-    }
-    if (typeof param === "function") {
+    } else if (typeof param === "function") {
       return this.orElseRun(param as () => R);
-    }
-    else {
+    } else {
       return this.orElseGet(param);
     }
   }
@@ -95,8 +87,7 @@ export default class Optional<T> {
   private orElseThrow(err: Error): NonNullable<T> {
     if (this.elem === null || this.elem === undefined) {
       throw err;
-    }
-    else {
+    } else {
       return this.elem as NonNullable<T>;
     }
   }
@@ -104,8 +95,7 @@ export default class Optional<T> {
   private orElseRun<R>(param: () => R): R | NonNullable<T> {
     if (this.elem === null || this.elem === undefined) {
       return param();
-    }
-    else {
+    } else {
       return this.elem as NonNullable<T>;
     }
   }
@@ -113,8 +103,7 @@ export default class Optional<T> {
   private orElseGet<R>(param: R): R | NonNullable<T> {
     if (this.elem === null || this.elem === undefined) {
       return param;
-    }
-    else {
+    } else {
       return this.elem as NonNullable<T>;
     }
   }

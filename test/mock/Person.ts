@@ -1,4 +1,4 @@
-import Optional from "@libs/optional/Optional";
+import State from "@libs/optional/State";
 import SubAbstractPerson from "./SubAbstractPerson";
 
 export default class Person extends SubAbstractPerson<Person> {
@@ -14,5 +14,5 @@ export default class Person extends SubAbstractPerson<Person> {
     return new Person(name, age);
   }
 
-  run = () => Optional.of(this as Person);
+  run = () => State.of(this as Person);
 }
